@@ -160,6 +160,7 @@ function exportCredentials(params){
   // Setting the credentials as secrets masks them in Github Actions logs
   const {accessKeyId, secretAccessKey, sessionToken} = params;
 
+  core.debug("export credentials")
   // AWS_ACCESS_KEY_ID:
   // Specifies an AWS access key associated with an IAM user or role
   core.setSecret(accessKeyId);
@@ -230,9 +231,14 @@ async function validateCredentials(expectedAccessKeyId, roleChaining) {
   try {
     credentials = await loadCredentials();
 
+    core.debug(credentials.accessKeyId)
+    core.debug(credentials.secretAccessKey)
+
     if (!credentials.accessKeyId) {
       throw new Error('Access key ID empty after loading credentials');
     }
+
+    //exportCredentials(credentials);
   } catch (error) {
     throw new Error(`Credentials could not be loaded, please check your action inputs: ${error.message}`);
   }
@@ -370,6 +376,7 @@ async function run() {
       // cases where this action is on a self-hosted runner that doesn't have credentials
       // configured correctly, and cases where the user intended to provide input
       // credentials but the secrets inputs resolved to empty strings.
+      core.debug("validating credentials")
       await validateCredentials(accessKeyId, roleChaining);
 
       sourceAccountId = await exportAccountId(maskAccountId, region);
